@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(image,'mreut')//获取图像</l>
+<l>get_image_size(image,Width,Height)//获取图像大小</l>
+<l>dev_open_window(0,0,Width,Height,'black',windowID)//打开窗口</l>
+<l>dev_display(image)//显示图像</l>
+<l>hom_mat2d_identity(HomMat2DIdentity)//添加一个缩放以均匀的二维变换矩阵</l>
+<l>hom_mat2d_scale(HomMat2DIdentity,0.5,0.5,0,0,HomMat2DIdentity)//把缩放添加到仿射变换矩阵</l>
+<l>dev_open_window(0,0,Width,Height,'black',windowID)//再打开一个窗口</l>
+<l>affine_trans_image_size(image,ImageAffineTrans,HomMat2DIdentity,'constant',Width,Height)//用户名为ImageAffineTrans</l>
+<l>dev_display(ImageAffineTrans)//关闭</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

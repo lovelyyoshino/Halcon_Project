@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(Image,'fabrik')</l>
+<l>dev_display(Image)</l>
+<l>gauss_distribution(30,Dist)//加噪声参数</l>
+<l>sp_distribution(30,30,Dist1)</l>
+<l>add_noise_distribution(Image,ImageNoise, Dist)//加噪声</l>
+<l>add_noise_distribution(Image,ImageNoise1, Dist1)//加噪声</l>
+<l>dev_display(ImageNoise)</l>
+<l>dev_display(ImageNoise1)</l>
+<l>get_image_size(Image, Width, Height)</l>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowID)</l>
+<l>mean_image(ImageNoise, ImageMean1,3,3)//降噪</l>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowID1)</l>
+<l>mean_image(ImageNoise, ImageMean2,5,5)//均值</l>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowID2)</l>
+<l>gauss_filter(ImageNoise, ImageMean3,3)//高斯</l>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowID3)</l>
+<l>median_image(ImageNoise1, ImageMean4,'circle', 3, 'mirrored')//中值</l>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowID4)</l>
+<l>fft_image(ImageNoise, ImageFFT)//傅里叶变换</l>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowID5)</l>
+<l>fft_generic(ImageNoise1,ImageFFT1, 'to_freq', -1, 'sqrt', 'dc_center', 'complex')//傅里叶变换</l>
+<l>dev_display(ImageMean1)</l>
+<l>dev_display(ImageMean2)</l>
+<l>dev_display(ImageMean3)</l>
+<l>dev_display(ImageMean4)</l>
+<l>dev_display(ImageFFT)</l>
+<l>dev_display(ImageFFT1)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(Image,'fabrik')</l>
+<l>dev_display(Image)</l>
+<l>get_image_size(Image, Width, Height)</l>
+<l>hom_mat2d_identity (HomMat2DIdentity)//生成一个2D单位矩阵</l>
+<l>hom_mat2d_translate(HomMat2DIdentity, 64, 64, HomMat2DTranslate)//平移</l>
+<l>hom_mat2d_scale(HomMat2DIdentity, 2, 2, 5, 5, HomMat2DScale)</l>
+<l>hom_mat2d_rotate(HomMat2DIdentity, 0.78, 0, 0, HomMat2DRotate)</l>
+<l>dev_open_window(0, 0, 1000, 1000, 'black', WindowID)</l>
+<l>affine_trans_image(Image, ImageAffineTrans, HomMat2DTranslate, 'constant', 'false')//输出</l>
+<l>dev_display(ImageAffineTrans)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

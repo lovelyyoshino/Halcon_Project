@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(image,'fabrik')//读取图像</l>
+<l>get_image_size(image,Width,Height)//获取图片大小</l>
+<l>dev_open_window(0,0,Width, Height, 'black', WindowID)//新建窗口</l>
+<l>scale_image(image,ImageScaled1, -1, 255)////c=-1 对图像灰度缩放到0~255  </l>
+<l>dev_display(ImageScaled1)//显示</l>
+<l>gray_histo(ImageScaled1, ImageScaled1, AbsHisto1, RelHisto1)//计算指定区域的灰度值分布 </l>
+<l>gen_region_histo(Histo1,AbsHisto1, 255, 255, 1)//将一个直方图转换为一个区域</l>
+<c></c>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowID)</l>
+<l>scale_image(image,ImageScaled2,0.5,100)</l>
+<l>dev_display(ImageScaled2)</l>
+<l>gray_histo(ImageScaled2,ImageScaled2, AbsHisto2, RelaHisto2)//计算出图像区域内的绝对和相对灰度值直方图。</l>
+<l>gen_region_histo(Histo2,AbsHisto2, 255, 255, 1)</l>
+<c></c>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowID)</l>
+<l>scale_image(image,ImageScaled3,0.5,100)</l>
+<l>dev_display(ImageScaled3)</l>
+<l>equ_histo_image(ImageScaled3,ImageScaled3)</l>
+<l>gray_histo(ImageScaled3,ImageScaled3, AbsHisto3, RelaHisto3)</l>
+<l>gen_region_histo(Histo3,AbsHisto3, 255, 255, 1)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

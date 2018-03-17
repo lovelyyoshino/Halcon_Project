@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(Image,'fabrik')</l>
+<l>get_image_size(Image, Width, Height)</l>
+<l>gen_lowpass(ImageLowpass, 0.1, 'n', 'dc_edge',Width ,Height)//低通</l>
+<l>fft_generic(Image, ImageFFT, 'to_freq', -1, 'none', 'dc_edge', 'complex')//傅里叶变换</l>
+<l>convol_fft(ImageFFT, ImageLowpass, ImageConvol)//混合</l>
+<l>fft_generic(ImageConvol, ImageResult, 'from_freq', 1, 'none', 'dc_edge', 'byte')</l>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowHandle)</l>
+<l>dev_display(Image)</l>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowHandle1)</l>
+<l>dev_display(ImageResult)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
