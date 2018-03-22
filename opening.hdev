@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(Image,'letters')</l>
+<l>threshold(Image, Region, 0, 100)//二值化选择颜色</l>
+<l>connection(Region, ConnectedRegions)//获取连通域</l>
+<l>select_obj(ConnectedRegions, ObjectSelected, 100)//从一个目标元组中选择目标</l>
+<l>erosion_circle(ObjectSelected, RegionErosion, 1)//腐蚀</l>
+<l>opening(Region,RegionErosion, RegionOpening)</l>
+<l>dev_display(Image)</l>
+<l>dev_set_color('red')</l>
+<l>dev_display(RegionOpening)</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
