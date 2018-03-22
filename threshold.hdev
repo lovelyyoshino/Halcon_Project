@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(Image,'clip')</l>
+<l>dev_set_colored(12)//颜色设置</l>
+<l>threshold(Image, Drak, 0, 150)//阈值分割</l>
+<l>count_obj(Drak,NumThresholded)//分割阈值个数</l>
+<l>dev_display(Drak)</l>
+<l>connection(Drak, ConnectedRegions)//连通域</l>
+<l>count_obj(ConnectedRegions, NumConnected)</l>
+<l>select_shape(ConnectedRegions, SelectedRegions, 'area', 'and', 1000, 10000)//选择特征域</l>
+<l>count_obj(SelectedRegions, NumConnected)</l>
+<l>dev_display(ConnectedRegions)</l>
+<c></c>
+<c></c>
+<l>read_image(Image1,'monkey')</l>
+<l>get_image_size(Image1, Width, Height)</l>
+<l>threshold(Image1, Region, 128, 255)</l>
+<l>connection(Region, ConnectedRegions1)</l>
+<l>select_shape(ConnectedRegions1, Eyes, ['area','max_diameter'],'and',[500,30],[1000,50])</l>
+<l>area_center(Eyes, Area, Row, Column)</l>
+<l>elliptic_axis(Eyes, Ra, Rb, Phi)</l>
+<l>gen_ellipse(Ellipse, Row, Column,Phi, Ra, Rb)</l>
+<l>dev_open_window(0, 0, Width, Height, 'black', WindowHandle)</l>
+<l>dev_display(Ellipse)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
