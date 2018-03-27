@@ -2,7 +2,7 @@
 <hdevelop file_version="1.1" halcon_version="13.0">
 <procedure name="main">
 <interface/>
-<body>
+<body
 <l>dev_close_window()</l>
 <l>dev_open_window(0,0,400,400,'black', WindowHandle)</l>
 <l>gen_region_polygon(Line1,[300,300,200,0],[0,200,300,300])</l>
