@@ -1,1 +1,16 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(Image,'pellets')</l>
+<l>gen_rectangle1(Rectangle1, 0, 0, 200, 400)</l>
+<l>gen_rectangle1(Rectangle2, 200, 0, 400, 200)</l>
+<l>union2(Rectangle1, Rectangle2, Shape)</l>
+<l>distance_transform(Shape, DistanceImage,'chessboard','true', 640, 480)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
