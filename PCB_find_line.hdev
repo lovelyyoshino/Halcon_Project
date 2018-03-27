@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_close_window()</l>
+<l>dev_open_window(0,0,400,400,'black', WindowHandle)</l>
+<l>gen_region_polygon(Line1,[300,300,200,0],[0,200,300,300])</l>
+<l>gen_region_polygon(Line2,[350,350,250,0],[0,250,350,350])</l>
+<l>union2(Line1, Line2, Lines)</l>
+<l>dilation_circle(Lines, ThickLines, 7.5)</l>
+<l>gen_circle(Error1,120,347,7.5)</l>
+<l>gen_circle(Error2,90,287,7.5)</l>
+<l>union2(ThickLines,Error1,ThichLinesAdd)</l>
+<l>difference(ThichLinesAdd,Error2,ThichLinesError)</l>
+<l>distance_transform(ThickLines,LinesDistance,'chamfer-3-4','true',400,400)</l>
+<l>skeleton(ThickLines,Skeleton)</l>
+<l>reduce_domain(LinesDistance,Skeleton,LinesDistanceReduces)</l>
+<l>threshold(LinesDistanceReduces,NoError,[0,9],[6,20])</l>
+<l>distance_transform(ThichLinesError,LinesDistanceError,'chamfer-3-4','true',400,400)</l>
+<l>skeleton(ThichLinesError,SkeletonError)</l>
+<l>reduce_domain(LinesDistanceError, SkeletonError, LinesDistanceErrorReduced)</l>
+<l>threshold(LinesDistanceErrorReduced, Errors, [0,9],[6,20])</l>
+<l>dilation_circle(Errors, ErrorsDilation, 5.5)</l>
+<l>connection(ErrorsDilation, ConnectedRegions)</l>
+<l>area_center(ConnectedRegions, Area, Row, Column)</l>
+<l>dev_clear_window()</l>
+<l>dev_set_color('gray')</l>
+<l>dev_display(ThichLinesError)</l>
+<l>dev_set_draw('margin')</l>
+<l>dev_set_color('red')</l>
+<l>dev_set_line_width(3)</l>
+<l>disp_circle(WindowHandle, Row, Column,gen_tuple_const(|Row|,15.5))</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
