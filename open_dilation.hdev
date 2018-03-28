@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(Image,'pellets')</l>
+<l>binary_threshold(Image, LightRegion, 'max_separability', 'light', UsedThreshold)//设置阈值选取</l>
+<l>opening_circle(LightRegion, Region, 3.5)//光华操作</l>
+<l>erosion_circle(Region, RegionErosion, 7.5)//开操作</l>
+<l>connection(RegionErosion, ConnectedRegions)//连通区域</l>
+<l>count_obj(ConnectedRegions, Number)//计数</l>
+<l>dilation_circle(ConnectedRegions, RegionDilation, 7.5)//闭操作</l>
+<l>count_obj(RegionDilation, Number1)//计数</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
