@@ -1,1 +1,28 @@
 
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>read_image(Image,'fabrik')</l>
+<l>roberts(Image,ImageRoberts,'roberts_max')</l>
+<l>threshold(ImageRoberts, Region, 10, 255)</l>
+<l>skeleton(Region, Skeleton)</l>
+<c></c>
+<l>sobel_amp(Image,EdgeAmplitude, 'sum_abs', 3)</l>
+<l>threshold(EdgeAmplitude, Region1, 10, 255)</l>
+<l>skeleton(Region1, Skeleton1)</l>
+<c></c>
+<l>prewitt_amp(Image,ImageEdgeAmp)</l>
+<l>threshold(ImageEdgeAmp, Region2, 10, 255)</l>
+<l>skeleton(Region2, Skeleton2)</l>
+<c></c>
+<l>edges_image(Image,ImaAmp, ImaDir, 'canny', 2, 'nms', 12, 22)</l>
+<l>threshold(ImaAmp, Region3, 1, 255)</l>
+<l>skeleton(Region3, Skeleton3)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
