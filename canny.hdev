@@ -4,21 +4,32 @@
 <interface/>
 <body>
 <l>read_image(Image,'fabrik')</l>
-<l>roberts(Image,ImageRoberts,'roberts_max')</l>
+<l>roberts(Image,ImageRoberts,'roberts_max')//采用Roberts滤波器,边缘检测。</l>
 <l>threshold(ImageRoberts, Region, 10, 255)</l>
 <l>skeleton(Region, Skeleton)</l>
 <c></c>
-<l>sobel_amp(Image,EdgeAmplitude, 'sum_abs', 3)</l>
+<l>sobel_amp(Image,EdgeAmplitude, 'sum_abs', 3)//使用Sobel算子,边缘检测。</l>
 <l>threshold(EdgeAmplitude, Region1, 10, 255)</l>
 <l>skeleton(Region1, Skeleton1)</l>
 <c></c>
-<l>prewitt_amp(Image,ImageEdgeAmp)</l>
+<l>prewitt_amp(Image,ImageEdgeAmp)//利用Prewitt算子，边缘检测。</l>
 <l>threshold(ImageEdgeAmp, Region2, 10, 255)</l>
 <l>skeleton(Region2, Skeleton2)</l>
-<c></c>
-<l>edges_image(Image,ImaAmp, ImaDir, 'canny', 2, 'nms', 12, 22)</l>
+<l>edges_image(Image,ImaAmp, ImaDir, 'canny', 2, 'nms', 12, 22)//canny算子</l>
 <l>threshold(ImaAmp, Region3, 1, 255)</l>
 <l>skeleton(Region3, Skeleton3)</l>
+<c></c>
+<l>laplace_of_gauss(Image, ImageLaplace, 2)//拉布拉斯算子</l>
+<l>threshold(ImageLaplace, Region3, 1, 255)</l>
+<l>skeleton(Region3, Skeleton3)</l>
+<c></c>
+<l>zero_crossing(Image, RegionCrossing)//从图像中提取零交叉点。</l>
+<l>threshold(RegionCrossing, Region3, 1, 255)</l>
+<l>skeleton(Region3, Skeleton3)</l>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
 </body>
 <docu id="main">
 <parameters/>
