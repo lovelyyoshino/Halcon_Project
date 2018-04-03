@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>create_pose(0.1, 0.1, 0.1, 90, 90, 90, 'Rp+T', 'gba', 'point', Pose)//两个位置</l>
+<l>create_pose(0.1, 0.4, 0.1, 23, 23, 90, 'Rp+T', 'gba', 'point', Pose2)</l>
+<l>pose_invert(Pose,PoseInvert)//反转</l>
+<l>pose_invert([Pose,Pose2],PoseInvert1)</l>
+<l>pose_to_hom_mat3d(Pose,HomMat3D)//位置转3d</l>
+<l>hom_mat3d_to_pose(HomMat3D, Pose3)//3d转位置</l>
+<l>hom_mat3d_invert(HomMat3D, HomMat3DInvert)//3d反转</l>
+<l>hom_mat3d_to_pose(HomMat3DInvert,PoseInvertAlternstive)//3d转位置</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
