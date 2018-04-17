@@ -1,0 +1,69 @@
+#
+# INTERNAL CAMERA PARAMETERS
+#
+
+# ===== generic parameter syntax ==========================================
+#
+# Syntax:      ParGroup: <pargroupname>;
+#                        <pargroup_description>;
+#
+#               <name> : <shortname> : <default_value>;
+#                        <type> : <lower_bound> : <upper_bound>;
+#                        <description>;
+#
+#                [ <type> ::= BOOL|XBOOL|INT|FLOAT|DOUBLE|STRING ]
+#
+# =========================================================================
+
+
+
+##############################################################################
+#
+#  Camera : Parameter
+#    >  Focus
+#    >  Sx
+#    >  Sy
+#    >  Cx
+#    >  Cy
+#    >  Kappa
+#    >  ImageWidth
+#    >  ImageHeight
+#
+##############################################################################
+
+ParGroup: Camera: Parameter;
+	"Internal camera parameters";
+
+Focus:foc:	1.17685423e-002;
+	DOUBLE:0.0:;
+	"Focal length of the lens [meter]";
+
+Kappa:kappa:	-2.54169782e+003;
+	DOUBLE::;
+	"Radial distortion coefficient [1/(meter*meter)]";
+
+Sx:sx:	7.32908724e-006;
+	DOUBLE:0.0:;
+	"Width of a cell on the sensor [meter]";
+
+Sy:sy:	7.40000000e-006;
+	DOUBLE:0.0:;
+	"Height of a cell on the sensor [meter]";
+
+Cx:cx:	3.23600159e+002;
+	DOUBLE:0.0:;
+	"X-coordinate of the image center [pixel]";
+
+Cy:cy:	2.45555344e+002;
+	DOUBLE:0.0:;
+	"Y-coordinate of the image center [pixel]";
+
+ImageWidth:imgw:	646;
+	INT:0:2048;
+	"Width of the images [pixel]";
+
+ImageHeight:imgh:	493;
+	INT:0:2048;
+	"Height of the images [pixel]";
+
+
