@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>CharH := []</l>
+<l>ChineseNames:=['川','鄂','甘','赣','贵','桂','黑','沪','吉','冀','津','京','苏','湘']//设置为11个类</l>
+<l>for i := 0 to 9 by 1</l>
+<l>   CharH[i] := chr(round(i + ord('0')))</l>
+<l>endfor</l>
+<l>for i := 10 to 36-1 by 1</l>
+<l>   CharH[i] := chr(round(i-10 + ord('A')))</l>
+<l>endfor</l>
+<l>for i := 36 to 50-1 by 1</l>
+<l>   CharH[i] :=ChineseNames[i-36]</l>
+<l>endfor</l>
+<l>NumChar := |CharH|</l>
+<l>TrainFile := 'Chepai.trf'</l>
+<l>dev_set_check ('~give_error')</l>
+<l>delete_file (TrainFile)</l>
+<l>dev_set_check ('give_error')</l>
+<l>for Indexfile:=0 to |CharH| - 1 by 1</l>
+<l>list_files ('C:/Users/user_/Desktop/HALCON/车牌识别/charSamples/'+CharH[Indexfile], ['files','follow_links'], ImageFiles)</l>
+<l>tuple_regexp_select (ImageFiles, ['\\.(png|jpg)$','ignore_case'], ImageFiles)</l>
+<l>for Index := 0 to |ImageFiles| - 1 by 1</l>
+<l>    read_image (ImageSige, ImageFiles[Index])</l>
+<l>    append_ocr_trainf(ImageSige,ImageSige,CharH[Indexfile],TrainFile)</l>
+<l>endfor</l>
+<l>endfor</l>
+<c>* ****</c>
+<c>* step: read training data</c>
+<c>* ****</c>
+<l>read_ocr_trainf_names (TrainFile, CharacterNames, CharacterCount)</l>
+<l>stop ()</l>
+<c>* ****</c>
+<c>* step: create and train classifier</c>
+<c>* ****</c>
+<l>create_ocr_class_mlp(8, 10, 'constant', 'default',CharacterNames, 80, 'none', 10, 42, OCRHandle)</l>
+<c>* Train the classifier</c>
+<l>trainf_ocr_class_mlp(OCRHandle, TrainFile, 200, 1, 0.01, Error, ErrorLog)//调用训练图集</l>
+<l>stop ()</l>
+<c>* ****</c>
+<c>* step: save classifier</c>
+<c>* ****</c>
+<l>FontFile := 'Chepai_mlp.omc'</l>
+<l>write_ocr_class_mlp(OCRHandle,FontFile)</l>
+<c>* free memory</c>
+<l>clear_ocr_class_mlp (OCRHandle)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
