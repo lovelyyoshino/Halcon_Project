@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>* </c>
+<c>* Prior to executing this example, the example</c>
+<c>* 'handeye_stationarycam_calibration.hdev' has to be executed.</c>
+<c>* Given the transformations computed by the hand-eye calibration</c>
+<c>* this example computes the pose of the robot tool in robot base</c>
+<c>* coordinates for grasping the nut with the gripper.</c>
+<l>dev_update_off ()</l>
+<l>dev_close_window ()</l>
+<c>* Directories with calibration images and data files</c>
+<l>ImageNameStart := '3d_machine_vision/handeye/stationarycam_'</l>
+<l>DataNameStart := 'handeye/stationarycam_'</l>
+<l>read_image (Image, ImageNameStart + 'nut12_square')</l>
+<l>dev_close_window ()</l>
+<l>get_image_size (Image, Width, Height)</l>
+<l>dev_open_window_fit_image (Image, 0, 0, Width, Height, WindowHandle)</l>
+<l>dev_set_draw ('margin')</l>
+<l>dev_set_line_width (2)</l>
+<l>set_display_font (WindowHandle, 14, 'mono', 'true', 'false')</l>
+<l>dev_display (Image)</l>
+<l>disp_message (WindowHandle, 'Object to grasp', 'window', 12, 12, 'black', 'true')</l>
+<c>* Read internal camera parameters and calibrated poses</c>
+<l>read_cam_par (DataNameStart + 'final_campar.dat', CamParam)</l>
+<l>read_pose (DataNameStart + 'final_pose_cam_base.dat', BaseInCamPose)</l>
+<l>pose_to_hom_mat3d (BaseInCamPose, cam_H_base)</l>
+<l>read_pose (DataNameStart + 'final_pose_tool_calplate.dat', CalplateInToolPose)</l>
+<l>pose_to_hom_mat3d (CalplateInToolPose, tool_H_calplate)</l>
+<c>* Read pose of gripper in tool coordinates</c>
+<l>read_pose (DataNameStart + 'pose_tool_gripper.dat', GripperInToolPose)</l>
+<l>pose_to_hom_mat3d (GripperInToolPose, tool_H_gripper)</l>
+<l>stop ()</l>
+<c>* Define reference coordinate system and display it</c>
+<l>CalplateFile := 'caltab_30mm.descr'</l>
+<l>define_reference_coord_system (ImageNameStart + 'calib3cm_00', CamParam, CalplateFile, WindowHandle, PoseRef)</l>
+<l>pose_to_hom_mat3d (PoseRef, cam_H_ref)</l>
+<l>Message := 'Defining a reference coordinate system'</l>
+<l>Message[1] := 'based on a calibration image'</l>
+<l>disp_message (WindowHandle, Message, 'window', 12, 12, 'black', 'true')</l>
+<l>disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>stop ()</l>
+<l>dev_display (Image)</l>
+<l>disp_3d_coord_system (WindowHandle, CamParam, PoseRef, 0.01)</l>
+<c>* Find parallel sides of the nut</c>
+<l>dev_set_color ('yellow')</l>
+<l>threshold (Image, BrightRegion, 60, 255)</l>
+<l>connection (BrightRegion, BrightRegions)</l>
+<l>select_shape (BrightRegions, Nut, 'area', 'and', 500, 99999)</l>
+<l>fill_up (Nut, NutFilled)</l>
+<l>gen_contour_region_xld (NutFilled, NutContours, 'border')</l>
+<l>segment_contours_xld (NutContours, LineSegments, 'lines', 5, 4, 2)</l>
+<l>fit_line_contour_xld (LineSegments, 'tukey', -1, 0, 5, 2, RowBegin, ColBegin, RowEnd, ColEnd, Nr, Nc, Dist)</l>
+<l>gen_empty_obj (Lines)</l>
+<l>for I := 0 to |RowBegin| - 1 by 1</l>
+<l>    gen_contour_polygon_xld (Contour, [RowBegin[I],RowEnd[I]], [ColBegin[I],ColEnd[I]])</l>
+<l>    concat_obj (Lines, Contour, Lines)</l>
+<l>endfor</l>
+<l>gen_polygons_xld (Lines, Polygon, 'ramer', 2)</l>
+<l>gen_parallels_xld (Polygon, ParallelLines, 50, 100, rad(10), 'true')</l>
+<l>dev_display (ParallelLines)</l>
+<c>* Accumulate corner points</c>
+<l>get_parallels_xld (ParallelLines, Row1, Col1, Length1, Phi1, Row2, Col2, Length2, Phi2)</l>
+<l>CornersRow := [Row1[0],Row1[1],Row2[0],Row2[1]]</l>
+<l>CornersCol := [Col1[0],Col1[1],Col2[0],Col2[1]]</l>
+<c>* Method 1: transform corners into reference coordinate system and determine grasp</c>
+<l>image_points_to_world_plane (CamParam, PoseRef, CornersRow, CornersCol, 'm', CornersX_ref, CornersY_ref)</l>
+<c>* Determine center and orientation of the grasp</c>
+<l>CenterPointX_ref := sum(CornersX_ref) * 0.25</l>
+<l>CenterPointY_ref := sum(CornersY_ref) * 0.25</l>
+<l>GraspPointsX_ref := [(CornersX_ref[0] + CornersX_ref[1]) * 0.5,(CornersX_ref[2] + CornersX_ref[3]) * 0.5]</l>
+<l>GraspPointsY_ref := [(CornersY_ref[0] + CornersY_ref[1]) * 0.5,(CornersY_ref[2] + CornersY_ref[3]) * 0.5]</l>
+<l>GraspPhiZ_ref := atan((GraspPointsY_ref[1] - GraspPointsY_ref[0]) / (GraspPointsX_ref[1] - GraspPointsX_ref[0]))</l>
+<c>* Display grasping points after projecting them into the image</c>
+<l>affine_trans_point_3d (cam_H_ref, GraspPointsX_ref, GraspPointsY_ref, [0,0], GraspPointsX_cam, GraspPointsY_cam, GraspPointsZ_cam)</l>
+<l>project_3d_point (GraspPointsX_cam, GraspPointsY_cam, GraspPointsZ_cam, CamParam, GraspPointsRow, GraspPointsCol)</l>
+<l>display_grasping_points (GraspPointsRow, GraspPointsCol, WindowHandle)</l>
+<l>disp_message (WindowHandle, 'Finding grasping points', 'window', 12, 12, 'black', 'true')</l>
+<l>disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>stop ()</l>
+<c>* Transform it into a homogeneous transformation matrix</c>
+<l>hom_mat3d_identity (HomMat3DIdentity)</l>
+<l>hom_mat3d_rotate (HomMat3DIdentity, GraspPhiZ_ref, 'z', 0, 0, 0, HomMat3D_RZ_Phi)</l>
+<l>hom_mat3d_translate (HomMat3D_RZ_Phi, CenterPointX_ref, CenterPointY_ref, 0, ref_H_grasp)</l>
+<c>* Display coordinate system of the gripper</c>
+<l>hom_mat3d_compose (cam_H_ref, ref_H_grasp, cam_H_grasp)</l>
+<l>hom_mat3d_to_pose (cam_H_grasp, GripperInCamPose)</l>
+<l>dev_set_colored (3)</l>
+<l>disp_3d_coord_system (WindowHandle, CamParam, GripperInCamPose, 0.01)</l>
+<l>Message := 'Determining the gripper pose'</l>
+<l>Message[1] := 'via the reference coordinate system'</l>
+<l>disp_message (WindowHandle, Message, 'window', 12, 12, 'black', 'true')</l>
+<l>disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>stop ()</l>
+<c>* Method 2: pose estimation using the four corner points of the nut</c>
+<l>NX := [0.009,-0.009,-0.009,0.009]</l>
+<l>NY := [0.009,0.009,-0.009,-0.009]</l>
+<l>NZ := [0,0,0,0]</l>
+<l>sort_corner_points (CornersRow, CornersCol, WindowHandle, NRow, NCol)</l>
+<l>vector_to_pose (NX, NY, NZ, NRow, NCol, CamParam, 'iterative', 'error', PoseCamNut, Quality)</l>
+<l>dev_set_colored (3)</l>
+<l>disp_3d_coord_system (WindowHandle, CamParam, GripperInCamPose, 0.01)</l>
+<l>Message := 'Alternative: Determining the gripper pose'</l>
+<l>Message[1] := 'via pose estimation using the corners'</l>
+<l>disp_message (WindowHandle, Message, 'window', 12, 12, 'black', 'true')</l>
+<l>disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>stop ()</l>
+<c>* Determine corresponding robot position (pose of the tool in base coordinates)</c>
+<c>* base_H_tool = base_H_cam * cam_H_ref * ref_H_grasp * gripper_H_tool</c>
+<c>* where to position the tool to grasp the nut</c>
+<l>hom_mat3d_invert (cam_H_base, base_H_cam)</l>
+<l>hom_mat3d_compose (base_H_cam, cam_H_grasp, base_H_grasp)</l>
+<l>hom_mat3d_invert (tool_H_gripper, gripper_H_tool)</l>
+<l>hom_mat3d_compose (base_H_grasp, gripper_H_tool, base_H_tool)</l>
+<l>hom_mat3d_to_pose (base_H_tool, PoseRobotGrasp)</l>
+<c>* Convert pose type to the one used by the robot controller (ZYX) and display it</c>
+<l>convert_pose_type (PoseRobotGrasp, 'Rp+T', 'abg', 'point', PoseRobotGrasp_ZYX)</l>
+<c>* Alternatively, the PoseRobotGrasp can be computed using only poses instead of</c>
+<c>* matrices.</c>
+<l>pose_invert (BaseInCamPose, CamInBasePose)</l>
+<l>pose_compose (CamInBasePose, GripperInCamPose, GripperInBasePose)</l>
+<l>pose_invert (GripperInToolPose, ToolInGripper)</l>
+<c>* The computed ToolInBasePose equals PoseRobotGrasp</c>
+<l>pose_compose (GripperInBasePose, ToolInGripper, ToolInBasePose)</l>
+<l>dev_display (Image)</l>
+<l>disp_3d_coord_system (WindowHandle, CamParam, GripperInCamPose, 0.01)</l>
+<l>disp_message (WindowHandle, 'Converting the pose into robot coordinates', 'window', 12, 12, 'black', 'true')</l>
+<l>dev_inspect_ctrl (PoseRobotGrasp_ZYX)</l>
+<c>* This pose should then be sent to the robot</c>
+<l>disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>stop ()</l>
+<l>dev_close_inspect_ctrl (PoseRobotGrasp_ZYX)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="define_reference_coord_system">
+<interface>
+<ic>
+<par name="ImageName" base_type="ctrl" dimension="0"/>
+<par name="CamParam" base_type="ctrl" dimension="0"/>
+<par name="CalplateFile" base_type="ctrl" dimension="0"/>
+<par name="WindowHandle" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="PoseCamRef" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<l>read_image (RefImage, ImageName)</l>
+<l>dev_display (RefImage)</l>
+<l>caltab_points (CalplateFile, X, Y, Z)</l>
+<c>* parameter settings for find_caltab and find_marks_and_pose</c>
+<l>SizeGauss := 3</l>
+<l>MarkThresh := 100</l>
+<l>MinDiamMarks := 5</l>
+<l>StartThresh := 128</l>
+<l>DeltaThresh := 10</l>
+<l>MinThresh := 18</l>
+<l>Alpha := 0.9</l>
+<l>MinContLength := 15</l>
+<l>MaxDiamMarks := 100</l>
+<l>find_caltab (RefImage, Caltab, CalplateFile, SizeGauss, MarkThresh, MinDiamMarks)</l>
+<l>find_marks_and_pose (RefImage, Caltab, CalplateFile, CamParam, StartThresh, DeltaThresh, MinThresh, Alpha, MinContLength, MaxDiamMarks, RCoord, CCoord, PoseCamRef)</l>
+<l>disp_3d_coord_system (WindowHandle, CamParam, PoseCamRef, 0.01)</l>
+<l>return ()</l>
+</body>
+<docu id="define_reference_coord_system">
+<short lang="en_US">defines reference coordinate system by the position of the calibration plate in an image</short>
+<parameters>
+<parameter id="CalplateFile"/>
+<parameter id="CamParam"/>
+<parameter id="ImageName"/>
+<parameter id="PoseCamRef"/>
+<parameter id="WindowHandle"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="sort_corner_points">
+<interface>
+<ic>
+<par name="CornersRow" base_type="ctrl" dimension="0"/>
+<par name="CornersCol" base_type="ctrl" dimension="0"/>
+<par name="WindowHandle" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="NRow" base_type="ctrl" dimension="0"/>
+<par name="NCol" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>* the problem: corner points on the parallels always are sorted clockwise, but</c>
+<c>* can start on left or right side</c>
+<c>* they must be sorted such that orientation of the nut</c>
+<c>* is similar to reference coordinate system, which acts as the start pose</c>
+<l>NumCornerPoints := 4</l>
+<l>for i := 0 to NumCornerPoints - 1 by 1</l>
+<l>    if (CornersRow[(i + 1) % NumCornerPoints] &gt; CornersRow[i])</l>
+<l>        if (i == 0)</l>
+<c>            * check pair 3-0</c>
+<l>            if (CornersRow[i] &gt; CornersRow[NumCornerPoints - 1])</l>
+<l>                IndexFirstCorner := 0</l>
+<l>                break</l>
+<l>            else</l>
+<l>                IndexFirstCorner := 1</l>
+<l>                break</l>
+<l>            endif</l>
+<l>        else</l>
+<l>            IndexFirstCorner := (i + 1) % NumCornerPoints</l>
+<l>            break</l>
+<l>        endif</l>
+<l>    endif</l>
+<l>endfor</l>
+<c>* sort image points so that they start with IndexFirstCorner and then "wrap around"</c>
+<l>if (IndexFirstCorner == 0)</l>
+<c>    * special treatment if no sorting is necessary (because tuple operation below would fail)</c>
+<l>    NRow := CornersRow</l>
+<l>    NCol := CornersCol</l>
+<l>else</l>
+<l>    NRow := [CornersRow[IndexFirstCorner:NumCornerPoints - 1],CornersRow[0:IndexFirstCorner - 1]]</l>
+<l>    NCol := [CornersCol[IndexFirstCorner:NumCornerPoints - 1],CornersCol[0:IndexFirstCorner - 1]]</l>
+<l>endif</l>
+<c>* display the corner points</c>
+<l>dev_set_color ('yellow')</l>
+<l>gen_cross_contour_xld (CornerPoints, NRow, NCol, 10, 0.785398)</l>
+<l>dev_display (CornerPoints)</l>
+<l>set_tposition (WindowHandle, NRow[0] - 10, NCol[0] + 10)</l>
+<l>write_string (WindowHandle, 'C1')</l>
+<l>set_tposition (WindowHandle, NRow[1], NCol[1] - 25)</l>
+<l>write_string (WindowHandle, 'C2')</l>
+<l>set_tposition (WindowHandle, NRow[2], NCol[2] - 25)</l>
+<l>write_string (WindowHandle, 'C3')</l>
+<l>set_tposition (WindowHandle, NRow[3] - 10, NCol[3] + 10)</l>
+<l>write_string (WindowHandle, 'C4')</l>
+<l>return ()</l>
+</body>
+<docu id="sort_corner_points">
+<short lang="en_US">sorts the corner points such that the first one lies in the vicinity of the x-axis of the reference coordinate system</short>
+<parameters>
+<parameter id="CornersCol"/>
+<parameter id="CornersRow"/>
+<parameter id="NCol"/>
+<parameter id="NRow"/>
+<parameter id="WindowHandle"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="display_grasping_points">
+<interface>
+<ic>
+<par name="RowGraspPoints" base_type="ctrl" dimension="0"/>
+<par name="ColGraspPoints" base_type="ctrl" dimension="0"/>
+<par name="WindowHandle" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<l>dev_set_color ('cyan')</l>
+<l>gen_cross_contour_xld (GraspingPoints, RowGraspPoints, ColGraspPoints, 10, 0.785398)</l>
+<l>dev_display (GraspingPoints)</l>
+<c>* determine which point is to the right or left of the nut to position text suitably</c>
+<l>if (ColGraspPoints[0] &lt; ColGraspPoints[1])</l>
+<l>    set_tposition (WindowHandle, RowGraspPoints[0] - 10, ColGraspPoints[0] - 20)</l>
+<l>    write_string (WindowHandle, 'G1')</l>
+<l>    set_tposition (WindowHandle, RowGraspPoints[1] + 5, ColGraspPoints[1] + 10)</l>
+<l>    write_string (WindowHandle, 'G2')</l>
+<l>else</l>
+<l>    set_tposition (WindowHandle, RowGraspPoints[0] - 15, ColGraspPoints[0] + 10)</l>
+<l>    write_string (WindowHandle, 'G1')</l>
+<l>    set_tposition (WindowHandle, RowGraspPoints[1] - 5, ColGraspPoints[1] - 25)</l>
+<l>    write_string (WindowHandle, 'G2')</l>
+<l>endif</l>
+<l>return ()</l>
+</body>
+<docu id="display_grasping_points">
+<short lang="en_US">displays the grasping points</short>
+<parameters>
+<parameter id="ColGraspPoints"/>
+<parameter id="RowGraspPoints"/>
+<parameter id="WindowHandle"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>
