@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>CharacterNames:=['A','B','C','D','E','F','G']//设置为7个类</l>
+<l>TrainFile:='train_characters_ocr.trf'</l>
+<l>FontFile:='MyLetter.omc'</l>
+<l>dev_open_window(0,0,400,400,'black', WindowHandle)</l>
+<c>*创建一个神经网络</c>
+<l>create_ocr_class_mlp(8, 10, 'constant', 'default',CharacterNames, 80, 'none', 10, 42, OCRHandle)</l>
+<c>*读取训练样本，并保存到训练文件</c>
+<l>for I := 1 to 7 by 1</l>
+<l>    read_image(Image, 'ocr/chars_training_'+I$'.2d')</l>
+<l>    dev_display(Image)</l>
+<l>    get_region (Image, SortedRegions)</l>
+<l>    count_obj(SortedRegions,NumberObjects)</l>
+<l>    for J := 1 to NumberObjects by 1</l>
+<l>        select_obj(SortedRegions, ObjectSelected, J)</l>
+<l>        if(I==1 and J==1)</l>
+<l>            write_ocr_trainf(ObjectSelected, Image, CharacterNames[J-1], TrainFile)//给编号</l>
+<l>        else</l>
+<l>            append_ocr_trainf(ObjectSelected, Image,  CharacterNames[J-1], TrainFile)</l>
+<l>        endif</l>
+<l>        dev_set_color('gray')</l>
+<l>        dev_display(ObjectSelected)</l>
+<l>        stop()</l>
+<l>    endfor</l>
+<l>    disp_continue_message(WindowHandle,'black', 'true')</l>
+<l>    stop()</l>
+<l>endfor</l>
+<c>*用之前的训练文件来训练多层神经网络</c>
+<l>trainf_ocr_class_mlp(OCRHandle, TrainFile, 200, 1, 0.01, Error, ErrorLog)//调用训练图集</l>
+<l>write_ocr_class_mlp(OCRHandle, FontFile)</l>
+<l>clear_ocr_class_mlp(OCRHandle)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="get_region">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="SortedRegions" base_type="iconic" dimension="0"/>
+</oo>
+</interface>
+<body>
+<l>dev_set_color('white')</l>
+<l>threshold(Image, Region, 0, 125)</l>
+<l>connection(Region, ConnectedRegions)</l>
+<l>select_shape(ConnectedRegions, SelectedRegions, 'area', 'and', 50, 99999)</l>
+<l>sort_region(SelectedRegions, SortedRegions, 'first_point', 'true', 'row')</l>
+<l>return()</l>
+</body>
+<docu id="get_region">
+<parameters>
+<parameter id="Image"/>
+<parameter id="SortedRegions"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>
