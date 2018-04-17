@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_close_window ()</l>
+<l>read_image (Image, 'C:/Users/user_/Desktop/HALCON/车牌识别/chepai.jpg')</l>
+<l>dev_open_window (0, 0, 512, 512, 'black', WindowHandle)</l>
+<l>dev_display (Image)</l>
+<l>*gen_rectangle1 (Rectangle, 1390, 995, 2349, 4235)</l>
+<l>gen_rectangle1 (Rectangle, 1377, 455, 2349, 4235)</l>
+<l>reduce_domain (Image, Rectangle, ImageReduced)</l>
+<l>threshold (ImageReduced, Regions, 173, 223)</l>
+<c>*膨胀大点让左右型 湘字边起来</c>
+<l>dilation_rectangle1 (Regions, RegionDilation, 70, 30)</l>
+<c></c>
+<l>connection (RegionDilation, ConnectedRegions1)</l>
+<c></c>
+<c>*连通 好的字体与 最初的 整体region 求个交集</c>
+<l>intersection (ConnectedRegions1, Regions, RegionIntersection)</l>
+<c></c>
+<l>select_shape (RegionIntersection, SelectedRegions, 'area', 'and', 47967.1, 179315)</l>
+<l>sort_region (SelectedRegions, SortedRegions, 'first_point', 'true', 'column')</l>
+<c></c>
+<l>*Class:=['湘','A','9','7','2','W','X']</l>
+<l>*CharacterNames:='D:/Halcon ChenPaiShiBei.omc'</l>
+<c></c>
+<l>*write_ocr_trainf (SortedRegions, ImageReduced, Class, 'train_ocr')</l>
+<l>*read_ocr_trainf_names ('train_ocr', CharacterNames, CharacterCount)</l>
+<l>*create_ocr_class_mlp (8, 10, 'constant', 'default', Class, 90, 'none', 10, 42, OCRHandle2)</l>
+<c></c>
+<l>*trainf_ocr_class_mlp (OCRHandle2, 'train_ocr.trf', 200, 1, 0.01, Error, ErrorLog)</l>
+<l>*write_ocr_class_mlp (OCRHandle2,'C:/Users/user_/Desktop/HALCON/车牌识别/Chepai_mlp.omc' )</l>
+<c></c>
+<c></c>
+<l>*clear_ocr_class_mlp(OCRHandle2) </l>
+<c></c>
+<l>read_ocr_class_mlp( 'C:/Users/user_/Desktop/HALCON/车牌识别/Chepai_mlp.omc', OCRHandle1)</l>
+<l>do_ocr_multi_class_mlp(SortedRegions, ImageReduced, OCRHandle1, Results, Confidence)</l>
+<c></c>
+<l>disp_message (WindowHandle, Results, 'window', 12, 12, 'black', 'true')</l>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
