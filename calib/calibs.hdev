@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>ImgPath := '3d_machine_vision/calib/'</l>
+<l>dev_close_window ()</l>
+<l>dev_open_window (0, 0, 652, 494, 'black', WindowHandle)</l>
+<l>dev_update_off ()</l>
+<l>dev_set_draw ('margin')</l>
+<l>dev_set_line_width (3)</l>
+<l>OpSystem := environment('OS')</l>
+<l>set_display_font (WindowHandle, 14, 'mono', 'true', 'false')</l>
+<c>* </c>
+<c>* Calibrate the camera.</c>
+<c>* </c>
+<c></c>
+<l>StartCamPar := [0.016,0,0.0000074,0.0000074,326,247,652,494]</l>
+<l>create_calib_data ('calibration_object', 1, 1, CalibDataID)</l>
+<l>set_calib_data_cam_param (CalibDataID, 0, 'area_scan_division', StartCamPar)</l>
+<l>set_calib_data_calib_object (CalibDataID, 0, 'caltab_30mm.descr')</l>
+<l>NumImages := 10</l>
+<c>* Note, we do not use the image from which the pose of the measurement plane can be derived</c>
+<l>for I := 1 to NumImages by 1</l>
+<c>    </c>
+<l>read_image (Image, ImgPath + 'calib_' + I$'02d')</l>
+<c>    </c>
+<l>dev_display (Image)</l>
+<c>    </c>
+<l>find_calib_object (Image, CalibDataID, 0, 0, I, [], [])</l>
+<c>    </c>
+<l>get_calib_data_observ_contours (Caltab, CalibDataID, 'caltab', 0, 0, I)</l>
+<c>    </c>
+<l>dev_set_color ('green')</l>
+<c>    </c>
+<l>dev_display (Caltab)</l>
+<l>endfor</l>
+<l>calibrate_cameras (CalibDataID, Error)</l>
+<l>get_calib_data (CalibDataID, 'camera', 0, 'params', CamParam)</l>
+<l>get_calib_data (CalibDataID, 'calib_obj_pose', [0,1], 'pose', Pose)</l>
+<c>* Write the internal camera parameters to a file</c>
+<l>write_cam_par (CamParam, 'camera_parameters.dat')</l>
+<l>write_pose(Pose, 'campose.dat')</l>
+<l>Message := 'camera parameters have'</l>
+<l>Message[1] := 'been written to file'</l>
+<l>disp_message (WindowHandle, Message, 'window', 12, 12, 'red', 'false')</l>
+<l>clear_calib_data (CalibDataID)</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

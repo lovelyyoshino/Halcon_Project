@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_close_window ()</l>
+<l>dev_open_window (0, 0, 640, 480, 'black', WindowHandle)</l>
+<l>dev_update_off ()</l>
+<l>dev_set_draw ('margin')</l>
+<l>dev_set_line_width (3)</l>
+<l>OpSystem := environment('OS')</l>
+<l>set_display_font (WindowHandle, 22, 'mono', 'true', 'false')</l>
+<c></c>
+<c>* </c>
+<c></c>
+<c>* Calibrate the camera.</c>
+<c></c>
+<c>* </c>
+<l>StartCamPar := [0.016,0,0.0000074,0.0000074,640,360,1280,720]</l>
+<l>create_calib_data ('calibration_object', 1, 1, CalibDataID)</l>
+<l>set_calib_data_cam_param (CalibDataID, 0, 'area_scan_division', StartCamPar)</l>
+<l>set_calib_data_calib_object (CalibDataID, 0, 'caltab_30mm.descr')</l>
+<l>NumImages := 7</l>
+<l>for I := 1 to NumImages by 1</l>
+<c>    </c>
+<l>  read_image (Image, 'calib_' + I$'02d')</l>
+<c>    </c>
+<l>  dev_display (Image)</l>
+<c>    </c>
+<l>  find_calib_object (Image, CalibDataID, 0, 0, I, [], [])</l>
+<c>    </c>
+<l>  get_calib_data_observ_contours (Caltab, CalibDataID, 'caltab', 0, 0, I)</l>
+<c> </c>
+<l> get_calib_data_observ_points (CalibDataID, 0, 0, I, Row, Column, Index, StartPose)</l>
+<l>  dev_set_color ('green')</l>
+<c>    </c>
+<l>  dev_display (Caltab)</l>
+<c>   </c>
+<l>  dev_set_color ('red')</l>
+<c>   </c>
+<l>  disp_circle (WindowHandle, Row, Column, gen_tuple_const(|Row|,1.5))</l>
+<c></c>
+<l>endfor</l>
+<l>calibrate_cameras (CalibDataID, Errors)</l>
+<l>get_calib_data (CalibDataID, 'camera', 0, 'params', CamParam)</l>
+<c>* The reference image, i.e., the image in which the calibration</c>
+<c>* plate is located on the ruler is the first image</c>
+<l>get_calib_data (CalibDataID, 'calib_obj_pose', [0,1], 'pose', Pose)</l>
+<c>* To take the thickness of the calibration plate into account, the z-value</c>
+<c>* of the origin given by the camera pose has to be translated by the</c>
+<c>* thickness of the calibration plate.</c>
+<c>* Deactivate the following line if you do not want to add the correction.</c>
+<l>set_origin_pose (Pose, 0, 0, 0.002, Pose)</l>
+<c>* measure the distance between the pitch lines</c>
+<l>read_image (Image, 'rule02')</l>
+<l>dev_display (Image)</l>
+<l>draw_rectangle1(WindowHandle,Row1,Column1,Row2,Column2)</l>
+<l>gen_rectangle1(Rectangle,Row1,Column1,Row2,Column2)</l>
+<l>Row:=(Row1+Row2)/2</l>
+<l>Col:=(Column1+Column2)/2</l>
+<l>Width:=(Column2-Column1)/2</l>
+<l>Height:=(Row2-Row1)/2</l>
+<l>gen_measure_rectangle2 (Row, Col, rad(-0.25), Width, Height, 1280, 720, 'bilinear', MeasureHandle)</l>
+<l>measure_pairs (Image, MeasureHandle, 0.5, 5, 'all', 'all', RowEdgeFirst, ColumnEdgeFirst, AmplitudeFirst, RowEdgeSecond, ColumnEdgeSecond, AmplitudeSecond, IntraDistance, InterDistance)</l>
+<l>Row := (RowEdgeFirst + RowEdgeSecond) / 2.0</l>
+<l>Col := (ColumnEdgeFirst + ColumnEdgeSecond) / 2.0</l>
+<l>disp_cross (WindowHandle, Row, Col, 20, rad(45))</l>
+<l>image_points_to_world_plane (CamParam, Pose, Row, Col, 'mm', X1, Y1)</l>
+<l>distance_pp (X1[0:11], Y1[0:11], X1[1:12], Y1[1:12], Distance)</l>
+<l>tuple_mean (Distance, MeanDistance)</l>
+<l>tuple_deviation (Distance, DeviationDistance)</l>
+<l>disp_message (WindowHandle, 'Mean distance: ' + MeanDistance$'.3f' + 'mm +/- ' + DeviationDistance$'.3f' + 'mm', 'window', 30, 60, 'yellow', 'false')</l>
+<l>close_measure (MeasureHandle)</l>
+<l>clear_calib_data (CalibDataID)</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

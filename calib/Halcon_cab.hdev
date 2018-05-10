@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="13.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>gen_caltab(7,7,0.00375,0.5,'C:/Users/user_/Desktop/git/caltab_30mm.descr','C:/Users/user_/Desktop/git/40_40.ps')</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
